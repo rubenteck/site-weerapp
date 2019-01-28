@@ -1,24 +1,30 @@
 <html>
-	<head>
-	
-		<link rel="stylesheet" href="./index.css"/>
-		
-		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
-		
-		<!-- Make sure you put this AFTER Leaflet's CSS -->
-		<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
-		
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 
-	</head>
-	<body>
-		
-		<div id="mapid"></div>
-		
-		<script type="text/javascript">
+<head>
+
+	<link rel="stylesheet" href="./index.css" />
+
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA=="
+	 crossorigin="" />
+
+	<!-- Make sure you put this AFTER Leaflet's CSS -->
+	<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg=="
+	 crossorigin=""></script>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+	<script src="jquery.csv.js"></script>
+
+</head>
+
+<body>
+
+	<div id="mapid"></div>
+
+	<script type="text/javascript">
+		$(document).ready(function () {
+
 			//initialize map
 			var mymap = L.map('mapid').setView([37.8, -96], 4);
-			
+
 			//add tilelayer
 			L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
 				attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -26,80 +32,112 @@
 				id: 'mapbox.streets',
 				accessToken: 'pk.eyJ1IjoicnViZW50ZWNrIiwiYSI6ImNqcmMwZHJtNjAxd2w0NGtnYWx1c3J2Y3gifQ.ThVIFKlARM0SnvqRBcbquA'
 			}).addTo(mymap);
-			
+
 			//create marker example
 			//var marker = L.marker([51.5, -0.09]).addTo(mymap);
-			
+
 			//add marker popup example
 			//marker.bindPopup("<b>Hello world!</b><br>I am a popup.");
-			
-			//read csv function		todo: complete function with read and transform
-			function read(file){
+
+			function readTextFile(file) {
+				var allText;
+				var rawFile = new XMLHttpRequest();
+				rawFile.open("GET", file, false);
+				rawFile.onreadystatechange = function () {
+					if (rawFile.readyState === 4) {
+						if (rawFile.status === 200 || rawFile.status == 0) {
+							allText = rawFile.responseText;
+							alert(allText);
+						}
+					}
+				}
+				rawFile.send(null);
+				return allText;
+			}
+			//	todo: complete function with read and transform
+
+			function read(file) {
 				var data = [];
-				
-				//read data
+				// lees het csv bestand in: 
+				$.ajax({
+					url: file,
+					async: false,
+					success: function (csvData) {
+						// converteer naar een array van objecten
+						data = $.csv.toObjects(csvData);
+					},
+					dataType: "text",
+				});
+				console.log(data);
+
+
 				console.log("reading " + file);
-				
-				
+
+
 				//transform data
-				
-				
+				console.log(data[0]);
 				return data;
 			}
-			
 			//read stations
 			var stations = read("stations.csv");
-			
+			var weatherData = read("weatherdata.csv");
+			console.log({
+				stations
+			});
 			//add markers		todo: check if stn, latitude and longitude are correctly inserted
 			var markers = [];
 			for (i = 0; i < stations.length; i++) {
-				var marker = L.marker(["stations[i].latitude", "stations[i].longitude"]).addTo(mymap);
+				if (stations[i].latitude != null && stations[i].longitude != null && stations[i].stn != null)
+					var marker = L.marker(["stations[i].latitude", "stations[i].longitude"]).addTo(mymap);
 				markers.append(["stations[i].stn", marker]);
 			}
-			
-			function updateMarkers(){
+
+			function updateMarkers() {
 				//get date and path variable
-				Number.prototype.padLeft = function(base,chr){
-					var  len = (String(base || 10).length - String(this).length)+1;
-					return len > 0? new Array(len).join(chr || '0')+this : this;
+				Number.prototype.padLeft = function (base, chr) {
+					var len = (String(base || 10).length - String(this).length) + 1;
+					return len > 0 ? new Array(len).join(chr || '0') + this : this;
 				}
 				var d = new Date,
 					dformat = d.getDate().padLeft() + "-" +
-						(d.getMonth()+1).padLeft() + "/" +
-						d.getHours().padLeft() + "/" +
-						d.getMinutes().padLeft();
-			
+					(d.getMonth() + 1).padLeft() + "/" +
+					d.getHours().padLeft() + "/" +
+					d.getMinutes().padLeft();
+				console.log("format:" + dformat)
 				//get data for popups for markers
-				var weatherData = read(dformat);
-			
+
+				//! hier wordt gewoon een date object meegegven aan de read function hoort hier een andere functie aangeroepen te worden ?!
+				// var weatherData = read(dformat);
+
 				//add popups
 				for (i = 0; i < weatherData.length; i++) {
-					findMarker(i);		//use function so return statement can stop for loop to increase speed
+					findMarker(i); //use function so return statement can stop for loop to increase speed
 				}
-			
-				function findMarker(i){
+
+				function findMarker(i) {
 					for (x = 0; x < markers.length; x++) {
-						if(weatherData[i].station == markers[x][0]){	//check station name
+						if (weatherData[i].station == markers[x][0]) { //check station name
 							markers[x].bindPopup("<b>humidity:</b><br>" + calcHumidity(weatherData[i].temp, weatherData[i].dewp));
 							return;
 						}
 					}
 				}
 			}
-			
+
 			updateMarkers();
-			setInterval(updateMarkers, 60*1000);	//repeat function every minute
-			
+			setInterval(updateMarkers, 60 * 1000); //repeat function every minute
+
 			//calculate humidity with an aproximation formula from http://www.weerschip.nl/formules.html
-			function calcHumidity(temperature, dewpoint){
+			function calcHumidity(temperature, dewpoint) {
 				return 100 * SDD(dewpoint) / SDD(temperature);
 			}
-			
-			function SDD(degreesC){
+
+			function SDD(degreesC) {
 				return 6.112 * Math.exp(17.62 * degreesC / (243.12 + degreesC));
 			}
-			
-		</script>
-		
-	</body>
+		})
+	</script>
+
+</body>
+
 </html>
