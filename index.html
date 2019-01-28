@@ -88,8 +88,8 @@
 			var markers = [];
 			for (i = 0; i < stations.length; i++) {
 				if (stations[i].latitude != null && stations[i].longitude != null && stations[i].stn != null)
-					var marker = L.marker(["stations[i].latitude", "stations[i].longitude"]).addTo(mymap);
-				markers.append(["stations[i].stn", marker]);
+					var marker = L.marker([stations[i].latitude, stations[i].longitude]).addTo(mymap);
+				markers.push(stations[i].stn, marker);
 			}
 
 			function updateMarkers() {
@@ -101,22 +101,22 @@
 				var d = new Date,
 					dformat = d.getDate().padLeft() + "-" +
 					(d.getMonth() + 1).padLeft() + "/" +
-					d.getHours().padLeft() + "/" +
+					d.getHours().padLeft() + ":" +
 					d.getMinutes().padLeft();
 				console.log("format:" + dformat)
 				//get data for popups for markers
 
-				//! hier wordt gewoon een date object meegegven aan de read function hoort hier een andere functie aangeroepen te worden ?!
+				//! hier wordt gewoon een date object meegegeven aan de read function hoort hier een andere functie aangeroepen te worden ?!
 				// var weatherData = read(dformat);
 
 				//add popups
 				for (i = 0; i < weatherData.length; i++) {
 					findMarker(i); //use function so return statement can stop for loop to increase speed
 				}
-
+				// todo: popups binden aan markers op de map, deze wordt momenteel gewoon in een lijst gestoken 
 				function findMarker(i) {
 					for (x = 0; x < markers.length; x++) {
-						if (weatherData[i].station == markers[x][0]) { //check station name
+						if (weatherData[i].station == markers[x].stn) { //check station name
 							markers[x].bindPopup("<b>humidity:</b><br>" + calcHumidity(weatherData[i].temp, weatherData[i].dewp));
 							return;
 						}
