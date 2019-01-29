@@ -81,14 +81,18 @@
 			//read stations
 			var stations = read("stations-us.csv");
 			var weatherData = read("weatherdata-us.csv");
-			console.log({
-				stations
-			});
+			console.log(weatherData[12]);
 			//add markers		todo: check if stn, latitude and longitude are correctly inserted
 			var markers = [];
 			for (i = 0; i < stations.length; i++) {
-				// if (stations[i].latitude != null && stations[i].longitude != null && stations[i].stn != null)
-					var marker = L.marker([stations[i].latitude, stations[i].longitude]).addTo(mymap);
+				// vraag weatherdata object dat correspondeert met het station object
+				localWeatherData = weatherData.filter(function(element){
+					return element.station == stations[i].stn;
+				})[0];
+				// voeg marker en popup toe. 
+				if (stations[i].latitude != null && stations[i].longitude != null && stations[i].stn != null)
+				var marker = L.marker([stations[i].latitude, stations[i].longitude]).addTo(mymap).bindPopup(
+					"<b>humidity:</b><br>" + calcHumidity(localWeatherData.temp, localWeatherData.dewp) );
 				markers.push(stations[i].stn, marker);
 			}
 
@@ -117,6 +121,7 @@
 				function findMarker(i) {
 					for (x = 0; x < markers.length; x++) {
 						if (weatherData[i].station == markers[x].stn) { //check station name
+							
 							markers[x].bindPopup("<b>humidity:</b><br>" + calcHumidity(weatherData[i].temp, weatherData[i].dewp));
 							return;
 						}
@@ -129,11 +134,11 @@
 
 			//calculate humidity with an aproximation formula from http://www.weerschip.nl/formules.html
 			function calcHumidity(temperature, dewpoint) {
-				return 100 * SDD(dewpoint) / SDD(temperature);
+				return 100 * SDD(parseFloat(dewpoint)) / SDD(parseFloat(temperature));
 			}
 
 			function SDD(degreesC) {
-				return 6.112 * Math.exp(17.62 * degreesC / (243.12 + degreesC));
+				return 6.112 * Math.exp(17.62 * parseFloat(degreesC) / (243.12 + parseFloat(degreesC)));
 			}
 		})
 	</script>

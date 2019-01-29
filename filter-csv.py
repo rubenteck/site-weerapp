@@ -1,5 +1,4 @@
 import csv
-import itertools
 reader = csv.reader(open(r"stations.csv"), delimiter=',')
 readerTwo = csv.reader(open(r"weatherdata.csv"), delimiter=',')
 filtered = filter(lambda p: 'UNITEDSTATES' == p[2], reader)
@@ -13,7 +12,6 @@ with open(r"stations-us.csv", 'w') as filteredfile:
     csv_output.writerow(headers)
     csv_output.writerows(filtered)
 
-filtered = filter(lambda stn: stn[0], reader)
 with open(r"stations-us.csv", "r") as filter_station, open(r"weatherdata-us.csv", 'w') as filteredWeather:
     csv_output = csv.writer(filteredWeather)
     filtered_reader = csv.reader(filter_station)
