@@ -79,15 +79,15 @@
 				return data;
 			}
 			//read stations
-			var stations = read("stations.csv");
-			var weatherData = read("weatherdata.csv");
+			var stations = read("stations-us.csv");
+			var weatherData = read("weatherdata-us.csv");
 			console.log({
 				stations
 			});
 			//add markers		todo: check if stn, latitude and longitude are correctly inserted
 			var markers = [];
 			for (i = 0; i < stations.length; i++) {
-				if (stations[i].latitude != null && stations[i].longitude != null && stations[i].stn != null)
+				// if (stations[i].latitude != null && stations[i].longitude != null && stations[i].stn != null)
 					var marker = L.marker([stations[i].latitude, stations[i].longitude]).addTo(mymap);
 				markers.push(stations[i].stn, marker);
 			}
