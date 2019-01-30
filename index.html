@@ -104,8 +104,8 @@
 							
 					console.log("format:" + dformat);
 					
-					//get data for popups for markers		todo: when testing is done change "23-01/21/54.csv" to dformat
-					var weatherData = read("23-01/21/54.csv");
+					//get data for popups for markers
+					var weatherData = read(dformat);
 					
 					//add popups
 					for (i = 0; i < weatherData.length; i++) {
@@ -119,8 +119,9 @@
 
 								markers[x][2].bindPopup(
 									"<b>" + markers[x][1] + ":</b><br>" +
-									"- humidity:<br>" +
-									calcHumidity(weatherData[i].temp, weatherData[i].dewp) + "<br>" +
+									"- temp: " + Math.round(weatherData[i].temp * 10)/10 + " °C<br>" +
+									"- dewp: " + Math.round(weatherData[i].dewp * 10)/10 + " °C<br>" +
+									"- humidity: " + Math.round(calcHumidity(weatherData[i].temp, weatherData[i].dewp) * 10)/10 + " %<br>" +
 									
 									//		todo: add chart humidity past hour (doesn't need a title so you can remove "- chart:<br>" and replace it with an actual chart)
 									"- chart:<br>"
@@ -137,7 +138,7 @@
 				updateMarkers();
 				setInterval(updateMarkers, 60 * 1000);		//repeat function every minute
 
-				//calculate humidity with an aproximation formula from http://www.weerschip.nl/formules.html		todo: check formula (has to return a percentage)
+				//calculate humidity with an aproximation formula from http://www.weerschip.nl/formules.html
 				function calcHumidity(temperature, dewpoint) {
 					return ((100 * SDD(parseFloat(dewpoint))) / SDD(parseFloat(temperature)));
 				}
