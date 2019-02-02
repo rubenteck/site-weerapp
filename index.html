@@ -8,7 +8,7 @@
 
 		<!-- Make sure you put this AFTER Leaflet's CSS -->
 		<script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
-	
+		<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
 		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 		<script src="jquery.csv.js"></script>
 	
@@ -31,6 +31,28 @@
 					id: "mapbox.streets",
 					accessToken:"pk.eyJ1IjoicnViZW50ZWNrIiwiYSI6ImNqcmMwZHJtNjAxd2w0NGtnYWx1c3J2Y3gifQ.ThVIFKlARM0SnvqRBcbquA"
 				}).addTo(mymap);
+
+
+				Number.prototype.mod = function(n) {
+				    return ((this%n)+n)%n;
+				};
+
+				//get date and path variable
+				Number.prototype.padLeft = function(base, chr) {
+					var len = String(base || 10).length - String(this).length + 1;
+					return len > 0 ? new Array(len).join(chr || "0") + this : this;
+				};
+
+				var d = new Date(),
+					dformat =
+						d.getDate().padLeft() +
+						"-" +
+						(d.getMonth() + 1).padLeft() +
+						"/" +
+						d.getHours().padLeft() +
+						"/" +
+						d.getMinutes().padLeft() +
+						".csv";
 
 				//create marker example
 				//var marker = L.marker([51.5, -0.09]).addTo(mymap);
@@ -63,10 +85,61 @@
 						dataType: "text"
 					});
 
-					console.log(data);
+					//console.log(data);
 					return data;
 				}
 			
+				function getAllHumidityPerMinute(hr, min) {
+					//var data = new Map;
+					//console.log(hr + ":" + min);
+					var data;
+					var humidity = new Map;
+					try {
+
+						var file =
+							d.getDate().padLeft() +
+							"-" +
+							(d.getMonth() + 1).padLeft() +
+							"/" +
+							hr +
+							"/" +
+							min +
+							".csv";
+
+						// lees het csv bestand in:
+						$.ajax({
+							url: file,
+							async: false,
+							headers: {
+								"accept": "text/csv",
+								"Access-Control-Allow-Origin": "*"
+							},
+							crossDomain: true, // allow cross origin resource sharing
+							success: function(csvData) {
+							// converteer naar een array van objecten
+							data = $.csv.toObjects(csvData);
+							},
+							error: function (xhr, ajaxOptions, thrownError) {
+								console.log(xhr.status);
+								console.log(thrownError);
+							},
+							dataType: "text"
+						});
+						//console.log(data);
+						for(var i = 0; i < data.length; i++) {
+							var entry = data[i];
+							humidity.set(entry.station, calcHumidity(entry.temp, entry.dewp));
+						}
+						return humidity;
+					}
+
+					catch(err) {
+						console.log(err);
+						return null;
+					}
+			
+				}
+
 				//read stations
 				var stations = read("stations.csv");
 				
@@ -85,13 +158,9 @@
 		
 				function updateMarkers() {
 				
-					//get date and path variable
-					Number.prototype.padLeft = function(base, chr) {
-						var len = String(base || 10).length - String(this).length + 1;
-						return len > 0 ? new Array(len).join(chr || "0") + this : this;
-					};
+
 					
-					var d = new Date(),
+					d = new Date(),
 						dformat =
 							d.getDate().padLeft() +
 							"-" +
@@ -102,18 +171,40 @@
 							d.getMinutes().padLeft() +
 							".csv";
 							
-					console.log("format:" + dformat);
+					//console.log("format:" + dformat);
 					
 					//get data for popups for markers
 					var weatherData = read(dformat);
-					
-					//add popups
-					for (i = 0; i < weatherData.length; i++) {
-						findMarker(i); //use function so return statement can stop for loop to increase speed
+					function prepHumidityChart() {
+						var curmin = d.getMinutes();
+						var curhr = d.getHours();
+						var humidities = new Map
+						for(var i = 60; i > 0; i-- ) {
+							let relhr;
+							if(curmin - i < 0) {
+								if(curhr > 0) {
+									relhr = curhr-1;
+								}
+								else {
+									continue;
+								}
+							}
+							else {
+								relhr = curhr
+							}
+							var relmin = (curmin - i).mod(60);
+							var humidity = getAllHumidityPerMinute(relhr.padLeft(), relmin.padLeft());
+							if(humidity !== undefined) {
+								var reltimeString = relhr + ":" + relmin;
+								humidities.set(reltimeString, humidity);
+							}
+						}
+						console.log(humidities);
 					}
-					
+					prepHumidityChart();
 					//create and add pop-ups to markers
 					function findMarker(i) {
+						//console.log("Bap")
 						for (x = 0; x < markers.length; x++) {
 							if (weatherData[i].station == markers[x][0]) {
 
@@ -124,7 +215,7 @@
 									"- humidity: " + Math.round(calcHumidity(weatherData[i].temp, weatherData[i].dewp) * 10)/10 + " %<br>" +
 									
 									//		todo: add chart humidity past hour (doesn't need a title so you can remove "- chart:<br>" and replace it with an actual chart)
-									"- chart:<br>"
+									"- chart: " + "Boop"
 									
 								);
 								
@@ -133,6 +224,10 @@
 							}
 						}
 					}
+					//add popups
+					for (i = 0; i < weatherData.length; i++) {
+						findMarker(i); //use function so return statement can stop for loop to increase speed
+					}					
 				}
 
 				updateMarkers();
