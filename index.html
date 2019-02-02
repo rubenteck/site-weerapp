@@ -126,6 +126,9 @@
 							dataType: "text"
 						});
 						//console.log(data);
+						if(data === undefined) {
+							return null;
+						}
 						for(var i = 0; i < data.length; i++) {
 							var entry = data[i];
 							humidity.set(entry.station, calcHumidity(entry.temp, entry.dewp));
@@ -194,14 +197,16 @@
 							}
 							var relmin = (curmin - i).mod(60);
 							var humidity = getAllHumidityPerMinute(relhr.padLeft(), relmin.padLeft());
-							if(humidity !== undefined) {
-								var reltimeString = relhr + ":" + relmin;
+							var reltimeString = relhr.padLeft() + ":" + relmin.padLeft();
+							if(humidity !== undefined && humidity !== null) {
 								humidities.set(reltimeString, humidity);
 							}
 						}
-						console.log(humidities);
+						return humidities;
 					}
-					prepHumidityChart();
+					var humidityPastHourData = prepHumidityChart();
+					console.log(humidityPastHourData);
+
 					//create and add pop-ups to markers
 					function findMarker(i) {
 						//console.log("Bap")
@@ -215,7 +220,8 @@
 									"- humidity: " + Math.round(calcHumidity(weatherData[i].temp, weatherData[i].dewp) * 10)/10 + " %<br>" +
 									
 									//		todo: add chart humidity past hour (doesn't need a title so you can remove "- chart:<br>" and replace it with an actual chart)
-									"- chart: " + "Boop"
+									//The Chart data is set up in such a way that you request the time by using the hh:mm key to retrieve all the station data at that time, then use the station id as the key to retrieve that station's humidity
+									"- chart: " + "Map here"
 									
 								);
 								
