@@ -85,13 +85,10 @@
 						dataType: "text"
 					});
 
-					//console.log(data);
 					return data;
 				}
 			
 				function getAllHumidityPerMinute(hr, min) {
-					//var data = new Map;
-					//console.log(hr + ":" + min);
 					var data;
 					var humidity = new Map;
 					try {
@@ -125,7 +122,6 @@
 							},
 							dataType: "text"
 						});
-						//console.log(data);
 						if(data === undefined) {
 							return null;
 						}
@@ -137,7 +133,6 @@
 					}
 
 					catch(err) {
-						console.log(err);
 						return null;
 					}
 			
@@ -173,9 +168,7 @@
 							"/" +
 							d.getMinutes().padLeft() +
 							".csv";
-							
-					//console.log("format:" + dformat);
-					
+												
 					//get data for popups for markers
 					var weatherData = read(dformat);
 					function prepHumidityChart() {
@@ -209,7 +202,6 @@
 
 					//create and add pop-ups to markers
 					function findMarker(i) {
-						//console.log("Bap")
 						for (x = 0; x < markers.length; x++) {
 							if (weatherData[i].station == markers[x][0]) {
 
