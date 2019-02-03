@@ -204,7 +204,7 @@
 					function findMarker(i) {
 						for (x = 0; x < markers.length; x++) {
 							if (weatherData[i].station == markers[x][0]) {
-
+								var chconid = "chartcontainer" + i;
 								markers[x][2].bindPopup(
 									"<b>" + markers[x][1] + ":</b><br>" +
 									"- temp: " + Math.round(weatherData[i].temp * 10)/10 + " °C<br>" +
@@ -213,10 +213,36 @@
 									
 									//		todo: add chart humidity past hour (doesn't need a title so you can remove "- chart:<br>" and replace it with an actual chart)
 									//The Chart data is set up in such a way that you request the time by using the hh:mm key to retrieve all the station data at that time, then use the station id as the key to retrieve that station's humidity
-									"- chart: " + "Map here"
+									"- chart: " + "<div id=\"" + chconid + "\" style=\"height: 370px; width: 100%;\"></div>"
 									
-								);
-								
+								)
+								.on('popupopen', function(e) {
+
+
+									var humidities = [];
+									humidityPastHourData.forEach((value, key, map) => {
+										var hum = {};
+										hum.y = value.get(weatherData[i].station);
+										humidities.push(hum);
+									});
+									console.log(humidities);
+									var chart = new CanvasJS.Chart(chconid, {
+										animationEnabled: true,
+										theme: "light2",
+										title:{
+											text: "Humidity History"
+										},
+										axisY:{
+											includeZero: false
+										},
+										data: [{        
+											type: "line",       
+											dataPoints: humidities
+										}]
+									});
+									chart.render();										
+								})
+							
 								return;
 								
 							}
