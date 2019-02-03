@@ -54,13 +54,6 @@
 						d.getMinutes().padLeft() +
 						".csv";
 
-				//create marker example
-				//var marker = L.marker([51.5, -0.09]).addTo(mymap);
-
-				//add marker popup example
-				//marker.bindPopup("<b>Hello world!</b><br>I am a popup.");
-
-				//		todo: CORS (werkt niet in chrome)
 				function read(file) {
 					var data = [];
 					console.log("reading " + file);
@@ -211,11 +204,10 @@
 									"- dewp: " + Math.round(weatherData[i].dewp * 10)/10 + " °C<br>" +
 									"- humidity: " + Math.round(calcHumidity(weatherData[i].temp, weatherData[i].dewp) * 10)/10 + " %<br>" +
 									
-									//		todo: add chart humidity past hour (doesn't need a title so you can remove "- chart:<br>" and replace it with an actual chart)
 									//The Chart data is set up in such a way that you request the time by using the hh:mm key to retrieve all the station data at that time, then use the station id as the key to retrieve that station's humidity
-									"- chart: " + "<div id=\"" + chconid + "\" style=\"height: 370px; width: 100%;\"></div>"
+									"<div id=\"" + chconid + "\" style=\"height: 370px; width: 370px;\"></div>"
 									
-								)
+								,{maxWidth : 560})	//change max width for popup
 								.on('popupopen', function(e) {
 
 
